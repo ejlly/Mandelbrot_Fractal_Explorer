@@ -2,36 +2,34 @@
 #include <iostream>
 #include <cmath>
 #include "bmp/bmp.h"
-#include <list>
 #include <string>
+#include <list>
+#include <gmpxx.h>
 
 #define HEIGHT 1000
 #define WIDTH 1000
 
 #define DT 1
 
-#define COMPLEX_OPTI 1
+using namespace std;
 
 typedef long double ld;
 
-int nb_its = 100;
+long nb_its = 100;
+mp_bitcnt_t preci = 32;
+mpf_class pow2 = 1;
+mp_exp_t expo = 1600;
 BMP_Picture img;
 
-std::list<std::string> pics_titles;
+list<string> pics_titles;
 
 typedef struct{
 	char key[512];
-
-	char& operator[](int index){
-		if(index > 127)
-			return key[index - 1073741824 + 128];
-		else return key[index];
-	}
-
 } Input;
 
-int pool_int(){
-	int k = 0;
+long pool_number(){
+	long k = 0;
+	printf("New number of iterations (press Enter when done) :\n");
 	SDL_Event event;
 	while(SDL_WaitEvent(&event)){
 		switch(event.type){
@@ -103,56 +101,111 @@ int pool_int(){
 }
 
 struct Complex {
-	ld x,y;
+	mpf_class x,y;
 
-	Complex(ld x_coord, ld y_coord){
+	Complex(mpf_class x_coord, mpf_class y_coord){
 		x = x_coord;
 		y = y_coord;
 	}
-
-	Complex operator+(Complex &z){
-		return Complex(x+z.x, y+z.y);
-	}
-
-	//Opé optimisée pour Mandelbrot
-	void evo(Complex a){
-		ld const tmpx = x;
-		x = x*x - y*y + a.x;
-		y = 2*tmpx*y + a.y;
-	}
-
-	ld abs2(){
-		//module carré
-		return x*x+y*y;
-	}
 };
 
+void update_prec(Complex& a, Complex &b){
+	mpf_class tmpx(b.x - a.x, preci), tmpy(b.y - a.y, preci);
+	tmpx *= pow2;
+	tmpy *= pow2;
 
-void calculate_frame(Complex a, Complex b, bool recalculate){
+	if(tmpx < 1 || tmpy < 1){
+		printf("resizing!\n");
+		preci += 10;
+		pow2 *= 1024;
+	}
+}
+
+void calculate_frame(Complex& a, Complex& b){
 	printf("calculating...\n");
-	#if COMPLEX_OPTI == 0
-	Complex z0 = {0, 0}, z = {0, 0};
-	#else
-	ld x = 0, y = 0, x2 = 0, y2 = 0, x0 = 0, y0 = 0;
-	#endif
-	int n = 0;
+	update_prec(a, b);
+	mpf_class x(0, preci), y(0, preci), x2(0, preci), y2(0, preci), x0(0, preci), y0(0, preci), delta_x(0, preci), delta_y(0, preci);
+	mpf_class const dx((b.x - a.x)/HEIGHT, preci), dy((b.y - a.y)/WIDTH, preci);
+
+	long n = 0;
 	for(int i(0); i<HEIGHT; i++){
+		delta_x += dx;
+		delta_y = 0;
 		for(int j(0); j<WIDTH; j++){
-			if(!recalculate || (img(WIDTH-j-1, i).get_r() == 0 && img(WIDTH-j-1, i).get_g() == 0 && img(WIDTH-j-1, i).get_b() == 0)){
+
+			n = 0;
+
+			delta_y += dy;
+
+			x = a.x + delta_x; x0 = x;
+			y = a.y + delta_y; y0 = y;
+
+			x2 = x*x;
+			y2 = y*y;
+
+			while(x2 + y2 <= 4 && n++ < nb_its){
+				y =	(x+x)*y + y0;
+				x =	x2 - y2	+ x0;
+				x2 = x*x;
+				y2 = y*y;
+			}
+
+			if(n >= nb_its-1){
+				img(WIDTH-j-1, i).set_c(0,0,0);
+			}
+			else{
+
+				ld h = fmod(sqrt(n)*20, 360L);
+				ld s = .55;
+				ld l = .7;
+
+				ld c = (1 - abs(2*l - 1)) * s;
+				ld x = c*(1 - abs(fmod(h/60, 2L) - 1));
+				ld m = l-c/2;
+
+				if(h <= 60){
+					img(WIDTH-j-1,i).set_c((int) ((c+m)*255), (int) ((x+m)*255), (int) (m*255));
+				}
+				else if (h <= 120){
+					img(WIDTH-j-1,i).set_c((int) ((x+m)*255), (int) ((c+m)*255), (int) (m*255));
+				}
+				else if (h <= 180){
+					img(WIDTH-j-1,i).set_c((int) (m*255), (int) ((c+m)*255), (int) ((x+m)*255));
+				}
+				else if (h <= 240){
+					img(WIDTH-j-1,i).set_c((int) (m*255), (int) ((x+m)*255), (int) ((c+m)*255));
+				}
+				else if (h <= 300){
+					img(WIDTH-j-1,i).set_c((int) ((x+m)*255), (int) (m*255), (int) ((c+m)*255));
+				}
+				else{
+					img(WIDTH-j-1,i).set_c((int) ((c+m)*255), (int) (m*255), (int) ((x+m)*255));
+				}
+			}
+		}
+	}
+	pics_titles.push_front(string(a.x.get_str(expo) + "," + a.y.get_str(expo) + "," + b.x.get_str(expo) + "," + b.y.get_str(expo) + "," + to_string(nb_its) + ".bmp"));
+	string tmp = "pics/" + pics_titles.front();
+	img.save_BMP(tmp);
+	printf("done\n");
+}
+
+void recalculate_frame(Complex& a, Complex& b){
+	printf("calculating...\n");
+	mpf_class x(0, preci), y(0, preci), x2(0, preci), y2(0, preci), x0(0, preci), y0(0, preci), delta_x(0, preci), delta_y(0, preci);
+	mpf_class const dx((b.x - a.x)/HEIGHT, preci), dy((b.y - a.y)/WIDTH, preci);
+
+	long n = 0;
+	for(int i(0); i<HEIGHT; i++){
+		delta_x += dx;
+		delta_y = 0;
+		for(int j(0); j<WIDTH; j++){
+			delta_y += dy;
+			if(img(WIDTH-j-1, i).get_r() == 0 && img(WIDTH-j-1, i).get_g() == 0 && img(WIDTH-j-1, i).get_b() == 0){
 				n = 0;
 
-				#if COMPLEX_OPTI == 0
-				z0.x = a.x + i*(b.x - a.x)/HEIGHT; z.x = z0.x;
-				z0.y = a.y + j*(b.y - a.y)/WIDTH; z.y = z0.y;
-
-				while(n++ < nb_its && z.abs2() <= 4){
-					z.evo(z0);
-				}
-
-				n--;
-				#else
-				x = a.x + i*(b.x - a.x)/HEIGHT; x0 = x;
-				y = a.y + j*(b.y - a.y)/WIDTH; y0 = y;
+				x = a.x + delta_x; x0 = x;
+				y = a.y + delta_y; y0 = y;
 
 				x2 = x*x;
 				y2 = y*y;
@@ -163,9 +216,6 @@ void calculate_frame(Complex a, Complex b, bool recalculate){
 					x2 = x*x;
 					y2 = y*y;
 				}
-
-				#endif
-				//cout << n << endl;
 
 				if(n >= nb_its-1){
 					img(WIDTH-j-1, i).set_c(0,0,0);
@@ -180,28 +230,36 @@ void calculate_frame(Complex a, Complex b, bool recalculate){
 					ld x = c*(1 - abs(fmod(h/60, 2L) - 1));
 					ld m = l-c/2;
 
-					if(h <= 60) img(WIDTH-j-1,i).set_c((int) ((c+m)*255), (int) ((x+m)*255), (int) (m*255));
-					else if (h <= 120) img(WIDTH-j-1,i).set_c((int) ((x+m)*255), (int) ((c+m)*255), (int) (m*255));
-					else if (h <= 180) img(WIDTH-j-1,i).set_c((int) (m*255), (int) ((c+m)*255), (int) ((x+m)*255));
-					else if (h <= 240) img(WIDTH-j-1,i).set_c((int) (m*255), (int) ((x+m)*255), (int) ((c+m)*255));
-					else if (h <= 300) img(WIDTH-j-1,i).set_c((int) ((x+m)*255), (int) (m*255), (int) ((c+m)*255));
-					else img(WIDTH-j-1,i).set_c((int) ((c+m)*255), (int) (m*255), (int) ((x+m)*255));
+					if(h <= 60){
+						img(WIDTH-j-1,i).set_c((int) ((c+m)*255), (int) ((x+m)*255), (int) (m*255));
+					}
+					else if (h <= 120){
+						img(WIDTH-j-1,i).set_c((int) ((x+m)*255), (int) ((c+m)*255), (int) (m*255));
+					}
+					else if (h <= 180){
+						img(WIDTH-j-1,i).set_c((int) (m*255), (int) ((c+m)*255), (int) ((x+m)*255));
+					}
+					else if (h <= 240){
+						img(WIDTH-j-1,i).set_c((int) (m*255), (int) ((x+m)*255), (int) ((c+m)*255));
+					}
+					else if (h <= 300){
+						img(WIDTH-j-1,i).set_c((int) ((x+m)*255), (int) (m*255), (int) ((c+m)*255));
+					}
+					else{
+						img(WIDTH-j-1,i).set_c((int) ((c+m)*255), (int) (m*255), (int) ((x+m)*255));
+					}
 				}
 			}
 		}
 	}
-	pics_titles.push_front(std::string(std::to_string(a.x) + "," + std::to_string(a.y) +"," + std::to_string(b.x) + "," + std::to_string(b.y) + ",.bmp"));
-
-	std::string tmp = "/home/charles/Documents/misc_alg/cpp_train/mandel/pics/" + pics_titles.front();
-
+	pics_titles.push_front(string(a.x.get_str(expo) + "," + a.y.get_str(expo) + "," + b.x.get_str(expo) + "," + b.y.get_str(expo) + "," + to_string(nb_its) + ".bmp"));
+	string tmp = "pics/" + pics_titles.front();
 	img.save_BMP(tmp);
-	std::cout << "Saved picture as " << pics_titles.front() << "\n";
-
 	printf("done\n");
 }
 
 void update_screen(SDL_Window *win, SDL_Surface *ren_surface){
-	std::string pix_title = "/home/charles/Documents/misc_alg/cpp_train/mandel/pics/" + pics_titles.front();
+	string pix_title = "pics/" + pics_titles.front();
 
 	SDL_Surface *to_plot_img = SDL_LoadBMP(pix_title.c_str());
 
@@ -217,93 +275,56 @@ void update_screen(SDL_Window *win, SDL_Surface *ren_surface){
 	SDL_FreeSurface(to_plot_img);
 }
 
-bool revert_frame(Complex& a, Complex& b){
-	if(pics_titles.size() <= 1)
-		return false;
-
+void revert_frame(Complex& a, Complex& b){
 	pics_titles.pop_front();
-	std::string tmp = pics_titles.front();
+	string tmp = pics_titles.front();
 
+	a.x = mpf_class(tmp.substr(0, tmp.find(",")));
+	tmp.erase(0,tmp.find(",")+1);
 
-	int cur_pos(0), nxt_pos(tmp.find(","));
+	a.y = mpf_class(tmp.substr(0, tmp.find(",")));
+	tmp.erase(0,tmp.find(",")+1);
 
-	a.x = stold(tmp.substr(cur_pos, nxt_pos));
+	b.x = mpf_class(tmp.substr(0, tmp.find(",")));
+	tmp.erase(0,tmp.find(",")+1);
 
-	cur_pos = nxt_pos+1;
-	nxt_pos = tmp.find(",", cur_pos);
-
-	a.y = stold(tmp.substr(cur_pos, nxt_pos));
-
-	cur_pos = nxt_pos+1;
-	nxt_pos = tmp.find(",", cur_pos);
-
-	b.x = stold(tmp.substr(cur_pos, nxt_pos));
-
-	cur_pos = nxt_pos+1;
-	nxt_pos = tmp.find(",", cur_pos);
-
-	b.y = stold(tmp.substr(cur_pos, nxt_pos));
-
-	return true;
+	b.y = mpf_class(tmp.substr(0, tmp.find(",")));
 }
-
-bool zoom(Complex &a, Complex &b, int sto_x, int sto_y, int mouse_x, int mouse_y){
-	if(mouse_x != sto_x && mouse_y != sto_y){
-		int a_x = std::min(mouse_x, sto_x);
-		int a_y = std::min(mouse_y, sto_y);
-		int b_x = std::max(mouse_x, sto_x);
-		int b_y = std::max(mouse_y, sto_y);
-
-		if((b_x - a_x)*WIDTH > (b_y - a_y)*HEIGHT){
-			int const bary = (a_y + b_y)/2;
-			a_y = bary - (b_x - a_x)/2; //TODO : mult par un HEIGHT/WIDTH
-			b_y = bary + (b_x - a_x)/2;
-		}
-		else{
-			int const bary = (a_x + b_x)/2;
-			a_x = bary - (b_y - a_y)/2; //TODO : idem qu'au dessus
-			b_x = bary + (b_y - a_y)/2;
-		}
-
-
-		ld const tmp_ax(a.x), tmp_ay(a.y), tmp_bx(b.x), tmp_by(b.y);
-
-		a.x += a_x * (tmp_bx - tmp_ax)/HEIGHT;
-		b.x -= (HEIGHT - b_x) * (tmp_bx - tmp_ax)/HEIGHT;
-
-		a.y += (WIDTH - b_y) * (tmp_by - tmp_ay)/WIDTH;
-		b.y -= a_y * (tmp_by - tmp_ay)/WIDTH;
-
-		return true;
-	}
-
-	return false;
-}
-
 
 int main(int argc, char* argv[]){
 	if(SDL_Init(SDL_INIT_VIDEO) != 0) {
 		printf("Error initializing SDL: %s\n", SDL_GetError());
 	}
 
+	for(int i(0); i<preci-10; i++){
+		pow2 *= 2;
+	}
+
 	Input in;
-	memset(&in, 0, sizeof(in));
+	memset(&in,0,sizeof(in));
 
-	SDL_Window *win = SDL_CreateWindow("Mandelbrot", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, HEIGHT, WIDTH, SDL_WINDOW_RESIZABLE);
-
+	SDL_Window *win = SDL_CreateWindow("Mandelbrot Explorer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, HEIGHT, WIDTH, SDL_WINDOW_RESIZABLE);
 	SDL_Surface *ren_surface = SDL_GetWindowSurface(win);
 
 	int mouse_x(0), mouse_y(0); //coordonnées de la souris
 
+	//SDL_Delay(DT*1000);
 	SDL_Event events;
 
 	//a is bottom left, b if top right
-	Complex a = { -2, -2}, b = { 2, 2};
+	Complex a = {-2, -2}, b = {2, 2};
+	a.x = mpf_class(-2, preci);
+	a.y = mpf_class(-2, preci);
+
+	b.x = mpf_class(2, preci);
+	b.y = mpf_class(2, preci);
 
 	int sto_x(0), sto_y(0);
 
+	int a_x(0), a_y(0), b_x(0), b_y(0);
+
 	img = BMP_Picture(WIDTH, HEIGHT);
-	calculate_frame(a, b, false);
+	calculate_frame(a, b);
 	update_screen(win, ren_surface);
 
 	while(SDL_WaitEvent(&events)){
@@ -314,47 +335,39 @@ int main(int argc, char* argv[]){
 				SDL_DestroyWindow(win);
 				SDL_Quit();
 				printf("Closing !\n");
+				return 0;
 				break;
 
 			case SDL_KEYDOWN:
-				in[events.key.keysym.sym] = 1;
+				if(events.key.keysym.sym < 512)
+					in.key[events.key.keysym.sym] = 1;
 				break;
 
 			case SDL_KEYUP:
-				if(in[SDLK_ESCAPE] == 1){
-					SDL_FreeSurface(ren_surface);
-					SDL_DestroyWindow(win);
-					SDL_Quit();
-					printf("Closing !\n");
-					return 0;
-				}
-				if(in[SDLK_p] == 1){
-					printf("New number of iterations (press Enter when done) :\n");
-					nb_its = pool_int();
-					calculate_frame(a, b, true);
+				if(in.key[SDLK_p] == 1){
+					nb_its = pool_number();
+					recalculate_frame(a, b);
 					update_screen(win, ren_surface);
 				}
-				if(in[SDLK_k] == 1){
+				if(in.key[SDLK_k] == 1){
 					SDL_FreeSurface(ren_surface);
 					SDL_DestroyWindow(win);
 					SDL_Quit();
 					printf("Closing !\n");
 					return 0;
 				}
-				if(in[SDLK_b] == 1){
+				if(in.key[SDLK_b] == 1){
 					printf("going back !\n");
-					if(revert_frame(a, b))
-						update_screen(win, ren_surface);
-					else
-						std::cout << "Can't go back !!\n";
+					revert_frame(a, b);
+					update_screen(win, ren_surface);
 				}
-				in[events.key.keysym.sym] = 0;
+				if(events.key.keysym.sym < 512)
+					in.key[events.key.keysym.sym] = 0;
 				break;
 
 			case SDL_MOUSEMOTION:
 				mouse_x = events.motion.x;
 				mouse_y = events.motion.y;
-				//cout << mouse_x << " " << mouse_y << endl;
 				break;
 
 			case SDL_MOUSEBUTTONDOWN:
@@ -365,13 +378,36 @@ int main(int argc, char* argv[]){
 
 			case SDL_MOUSEBUTTONUP:
 				//printf("-clic\n");
-				if(zoom(a, b, sto_x, sto_y, mouse_x, mouse_y)){
-					calculate_frame(a, b, false);
+				if(mouse_x != sto_x && mouse_y != sto_y){
+					a_x = min(mouse_x, sto_x);
+					a_y = min(mouse_y, sto_y);
+					b_x = max(mouse_x, sto_x);
+					b_y = max(mouse_y, sto_y);
+
+					if((b_x - a_x)*WIDTH > (b_y - a_y)*HEIGHT){
+						int bary = (a_y + b_y)/2;
+						a_y = bary - (b_x - a_x)/2;
+						b_y = bary + (b_x - a_x)/2;
+					}
+					else{
+						int bary = (a_x + b_x)/2;
+						a_x = bary - (b_y - a_y)/2;
+						b_x = bary + (b_y - a_y)/2;
+					}
+
+					mpf_class const tmp_ax(a.x), tmp_ay(a.y), tmp_bx(b.x), tmp_by(b.y);
+
+					a.x += a_x * (tmp_bx - tmp_ax)/HEIGHT;
+					b.x -= (HEIGHT - b_x) * (tmp_bx - tmp_ax)/HEIGHT;
+
+					a.y += (WIDTH - b_y) * (tmp_by - tmp_ay)/WIDTH;
+					b.y -= a_y * (tmp_by - tmp_ay)/WIDTH;
+
+					calculate_frame(a, b);
 					update_screen(win, ren_surface);
 				}
 				break;
 		}
 	}
-
 	return 0;
 }
