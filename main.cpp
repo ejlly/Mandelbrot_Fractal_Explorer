@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <cmath>
+#include <ctime>
 #include <list>
 #include <string>
 
@@ -47,6 +48,7 @@ struct Complex {
 int pics_count(0);
 std::list<std::string> pics_titles;
 std::list<Complex> values_record;
+char* date;
 
 void calculate_frame(Complex const &a, Complex const &b, bool recalculate){
 	printf("calculating...\n");
@@ -95,13 +97,13 @@ void calculate_frame(Complex const &a, Complex const &b, bool recalculate){
 	}
 
 
-	pics_titles.push_front(std::to_string(pics_count++) + ".bmp");
+	pics_titles.push_front(date  + std::to_string(pics_count++) + ".bmp");
 	std::string new_save_filepath= SAVE_FILE + pics_titles.front();
 
 	img.save_BMP(new_save_filepath);
 	printf("Saved picture as %s\n", pics_titles.front().c_str());
 
-	printf("done\n");
+	//printf("done\n");
 }
 
 void update_screen(SDL_Window *win, SDL_Surface *ren_surface){
@@ -110,13 +112,13 @@ void update_screen(SDL_Window *win, SDL_Surface *ren_surface){
 	SDL_Surface *to_plot_img = SDL_LoadBMP(pix_title.c_str());
 
 	if(!to_plot_img)
-		printf("failed load bmp\n");
+		printf("Failed load bmp\n");
 
 	int result = SDL_BlitSurface(to_plot_img, NULL, ren_surface, NULL);
 	SDL_UpdateWindowSurface(win);
 
 	if(result < 0)
-		printf("failed blit image\n");
+		printf("Failed blit image\n");
 
 	SDL_FreeSurface(to_plot_img);
 }
@@ -191,6 +193,12 @@ int main(int argc, char* argv[]){
 
 	SDL_Event events;
 
+	time_t const cur_time = time(NULL);
+	date = asctime(localtime(&cur_time)); 
+	date[19] = ',';
+	date[20] = '\0';
+	date = date + 4;
+
 	//a is bottom left, b if top right
 	#if (WIDTH >= HEIGHT)
 	Complex a = {-2.*WIDTH/HEIGHT, -2}, b = {2.*WIDTH/HEIGHT, 2};
@@ -241,7 +249,7 @@ int main(int argc, char* argv[]){
 					return 0;
 				}
 				if(in[SDLK_b] == 1){
-					printf("going back !\n");
+					printf("Loading previous picture\n");
 					if(revert_frame(a, b))
 						update_screen(win, ren_surface);
 					else
