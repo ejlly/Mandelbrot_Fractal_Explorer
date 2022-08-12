@@ -4,12 +4,12 @@
 CC := clang++
 
 # set the compiler flags
-CFLAGS := `sdl2-config --libs --cflags` -ggdb3 -O2 -Wall -lSDL2_image -lm
+CFLAGS := `sdl2-config --libs --cflags` -O2 -Wall -lSDL2_image
 # add header files here
 #HDRS :=
 
 # add source files here
-SRCS := main.cpp bmp/bmp.cpp
+SRCS := main.cpp bmp/bmp.cpp sdlinput.cpp
 
 # generate names of object files
 OBJS := $(SRCS:.c=.o)
