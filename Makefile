@@ -9,7 +9,7 @@ CFLAGS := `sdl2-config --libs --cflags` -O2 -Wall -lSDL2_image
 #HDRS :=
 
 # add source files here
-SRCS := main.cpp bmp/bmp.cpp sdlinput.cpp
+SRCS := main.cpp bmp/bmp.cpp bmp/sdlinput.cpp
 
 # generate names of object files
 OBJS := $(SRCS:.c=.o)
