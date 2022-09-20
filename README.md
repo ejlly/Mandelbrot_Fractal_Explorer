@@ -36,7 +36,8 @@ Simply press n on your keyboard to revert to last Mandelbrot picture
 
 ### Only tested on Linux
 
-Change the SAVE_FILE constant inside the bmp/sdl_input.h file to an existing path on your machine
+Change the SAVE_FILE constant inside the bmp/params.h file to an existing path on your machine.
+You may change WIDTH and HEIGHT to fit your screen
 
 Compile with make
 
