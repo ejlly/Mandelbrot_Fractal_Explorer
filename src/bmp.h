@@ -32,7 +32,7 @@ class Pixel{
 class BMP_Picture{
 	private:
 		int width, height;
-		Pixel* pixels;
+		std::unique_ptr<Pixel[]> pixels;
 
 	public:
 		BMP_Picture();
