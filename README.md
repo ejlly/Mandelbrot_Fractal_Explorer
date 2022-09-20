@@ -35,3 +35,5 @@ Simply press n on your keyboard to revert to last Mandelbrot picture
 Change the SAVE_FILE constant inside the bmp/sdl_input.h file to an existing path on your machine
 
 Compile with make
+
+Run with ./exec
