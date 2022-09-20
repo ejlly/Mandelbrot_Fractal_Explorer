@@ -2,7 +2,7 @@
 
 Mandelbrot explorer using SDL2
 
-<img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_2.png" width="600" height="412"/> | <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_3.png" width="600" height="412"/> | <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_4.png" width="600" height="412"/>
+<img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_2.png" width="320" height="213"/> <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_3.png" width="320" height="213"/> <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_4.png" width="320" height="213"/>
 
 Allow for interactive exploration of the Mandelbrot fractal
 
@@ -20,7 +20,7 @@ Allow for interactive exploration of the Mandelbrot fractal
 
 ![](https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_5.png)
 
-### To generate the Julia fractal corresponding to a specific point you are seeing on the screen, you must first :
+### To generate the Julia fractal corresponding to a specific point you are seeing on the screen, you must :
 
 - Press n on your keyboard
 
