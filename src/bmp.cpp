@@ -19,13 +19,10 @@ void Pixel::set_c(uc p_r, uc p_g, uc p_b){r = p_r; g = p_g; b = p_b;}
 
 BMP_Picture::BMP_Picture() : width(0), height(0) {};
 BMP_Picture::BMP_Picture(int w, int h) :
-	width(w), height(h), pixels(sycl::malloc_shared<Pixel>(w*h, q)) {};
+	width(w), height(h), pixels(new Pixel[w*h]) {};
 BMP_Picture::BMP_Picture(int w, int h, Pixel *pixels_tab) :
 	width(w), height(h), pixels(pixels_tab) {};
 
-BMP_Picture::~BMP_Picture(){
-	free(pixels, q);
-}
 
 int BMP_Picture::get_width(){return width;}
 int BMP_Picture::get_height(){return height;}

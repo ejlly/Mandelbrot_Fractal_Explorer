@@ -1,10 +1,10 @@
 #include "sdlinput.h"
-#include <CL/sycl.hpp>
+#include "params.h"
 
 
 int pool_int(){
 	int k = 0;
-	SDL_Event event; //probably bad behaviour
+	SDL_Event event; //TODO: use same SDL_Event object as in main loop
 	while(SDL_WaitEvent(&event)){
 		switch(event.type){
 			case SDL_KEYUP:
@@ -106,66 +106,34 @@ void init_mem_pics(Mem_pics &memory){
 
 void calculate_frame(Mem_pics &memory, bool recalculate, bool drawsJulia){
 	printf("calculating...\n");
-	int *tmp = new int[WIDTH*HEIGHT];
-	
+	ld x = 0, y = 0, x2 = 0, y2 = 0, x0 = 0, y0 = 0;
+	int n = 0;
 	for(int i(0); i<WIDTH; i++){
 		for(int j(0); j<HEIGHT; j++){
 			int const c_x = HEIGHT - j - 1, c_y = i;
-			if(!recalculate || (memory.img(c_x, c_y).get_r() == 0 && memory.img(c_x, c_y).get_g() == 0 && memory.img(c_x, c_y).get_b() == 0))
-				tmp[i*HEIGHT + j] = memory.nb_its-1;
-			else
-				tmp[i*HEIGHT + j] = 0;
+			if(!recalculate || (memory.img(c_x, c_y).get_r() == 0 && memory.img(c_x, c_y).get_g() == 0 && memory.img(c_x, c_y).get_b() == 0)){
+				n = 0;
 
-		}
-	}
+				x = memory.a.x + i*(memory.b.x - memory.a.x)/WIDTH;
+				y = memory.a.y + j*(memory.b.y - memory.a.y)/HEIGHT;
+				if(!drawsJulia){
+					x0 = x;
+					y0 = y;
+				}
+				else{
+					x0 = memory.origin.x;
+					y0 = memory.origin.y;
+				}
 
+				x2 = x*x;
+				y2 = y*y;
 
-	if(!drawsJulia){
-		memory.img.q.parallel_for(sycl::range<2>(WIDTH, HEIGHT), [=](sycl::id<2> index){
-			int const i = index[0], j = index[1];
-			if(tmp[i*HEIGHT + j] == 0){
-				ld x = memory.a.x + i*(memory.b.x - memory.a.x)/WIDTH;
-				ld y = memory.a.y + j*(memory.b.y - memory.a.y)/HEIGHT;
-				ld x0 = x;
-				ld y0 = y;
-
-				ld x2 = x*x;
-				ld y2 = y*y;
-
-				while(x2 + y2 <= 4 && tmp[i*HEIGHT+j]++ < memory.nb_its){
+				while(x2 + y2 <= 4 && n++ < memory.nb_its){
 					y =	(x+x)*y + y0;
 					x =	x2 - y2	+ x0;
 					x2 = x*x;
 					y2 = y*y;
 				}
-			}
-		}).wait();
-	}
-	else{
-		memory.img.q.parallel_for(sycl::range<2>(WIDTH, HEIGHT), [=](sycl::id<2> index){
-			int const i = index[0], j = index[1];
-			if(tmp[i*HEIGHT + j] == 0){
-				ld x = memory.a.x + i*(memory.b.x - memory.a.x)/WIDTH;
-				ld y = memory.a.y + j*(memory.b.y - memory.a.y)/HEIGHT;
-				ld x0 = memory.origin.x;
-				ld y0 = memory.origin.y;
-
-				ld x2 = x*x;
-				ld y2 = y*y;
-
-				while(x2 + y2 <= 4 && tmp[i*HEIGHT+j]++ < memory.nb_its){
-					y =	(x+x)*y + y0;
-					x =	x2 - y2	+ x0;
-					x2 = x*x;
-					y2 = y*y;
-				}
-			}
-		}).wait();
-	}
-	for(int i(0) ;i<HEIGHT; i++){
-		for(int j(0); j<WIDTH; j++){
-			int n = tmp[i*HEIGHT+j];
-			int const c_x = HEIGHT - j - 1, c_y = i;
 
 				if(n >= memory.nb_its-1)
 					memory.img(c_x, c_y).set_c(0,0,0);
@@ -186,10 +154,9 @@ void calculate_frame(Mem_pics &memory, bool recalculate, bool drawsJulia){
 					else if (h <= 300) memory.img(c_x, c_y).set_c((int) ((x+m)*255), (int) (m*255), (int) ((c+m)*255));
 					else               memory.img(c_x, c_y).set_c((int) ((c+m)*255), (int) (m*255), (int) ((x+m)*255));
 				}
+			}
 		}
-	}).wait();
-	
-	delete[] tmp;
+	}
 
 
 	if(!drawsJulia) memory.pics_titles.push_front(memory.date  + std::to_string(memory.pics_count++) + ".bmp");
@@ -291,8 +258,7 @@ void kill_sdl(SDL_objs &sdl_objs){
 	SDL_Quit();
 }
 
-int catch_julia_press(SDL_objs &sdl_objs, Complex &origin, Mem_pics &memory){
-	int mouse_x(0), mouse_y(0);
+int catch_julia_press(SDL_objs &sdl_objs, Complex &origin, Mem_pics &memory, int mouse_x, int mouse_y){
 	while(SDL_WaitEvent(&sdl_objs.events)){
 		switch(sdl_objs.events.type){
 			case SDL_QUIT: 
@@ -379,7 +345,7 @@ bool main_loop(SDL_objs &sdl_objs, Complex &origin, bool drawsJulia){
 					if(!drawsJulia){
 						printf("Click to select new julia origin or press any other key to revert to normal mode\n");
 
-						switch(catch_julia_press(sdl_objs, origin, memory)){
+						switch(catch_julia_press(sdl_objs, origin, memory, mouse_x, mouse_y)){
 							case 0:
 								if(!main_loop(sdl_objs, origin, true))
 									return false;

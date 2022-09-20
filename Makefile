@@ -1,6 +1,6 @@
 CC := clang++
 
-CFLAGS := `sdl2-config --libs --cflags` -O2 -Wall -lSDL2_image -fsycl
+CFLAGS := `sdl2-config --libs --cflags` -O2 -Wall -lSDL2_image
 HDRS := src/sdlinput.h src/bmp.h src/params.h
 SRCS := src/main.cpp src/bmp.cpp src/sdlinput.cpp
 
@@ -9,7 +9,7 @@ OBJDIR := objs/
 OBJS := $(SRCS:.cpp=.o)
 
 # name of executable
-EXEC := gpu_accel
+EXEC := exec
 
 # default recipe
 all: $(EXEC)

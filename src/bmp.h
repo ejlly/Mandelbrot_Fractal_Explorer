@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <string>
-#include <CL/sycl.hpp>
 
 typedef unsigned char uc;
 
@@ -36,13 +35,9 @@ class BMP_Picture{
 		Pixel* pixels;
 
 	public:
-		sycl::queue q{sycl::host_selector()};
-
 		BMP_Picture();
 		BMP_Picture(int w, int h);
 		BMP_Picture(int w, int h, Pixel *pixels_tab);
-
-		~BMP_Picture();
 
 		int get_width();
 		int get_height();
