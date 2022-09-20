@@ -2,7 +2,7 @@
 
 Mandelbrot explorer using SDL2
 
-<img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_2.png" width="330" height="220"/> <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_3.png" width="330" height="220"/> <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_6.png" width="330" height="220"/>
+<img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_2.png" width="334" height="223"/> <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_3.png" width="334" height="223"/> <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_6.png" width="334" height="223"/>
 
 Allow for interactive exploration of the Mandelbrot fractal
 
@@ -18,7 +18,7 @@ Allow for interactive exploration of the Mandelbrot fractal
 
 ## Julia fractals
 
-![](https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_5.png)
+<img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_5.png" width="334" height="223"/> <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_7.png" width="334" height="223"/> <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_8.png" width="334" height="223"/>
 
 ### To generate the Julia fractal corresponding to a specific point you are seeing on the screen, you must :
 
