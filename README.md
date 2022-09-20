@@ -2,7 +2,8 @@
 
 Mandelbrot explorer using SDL2
 
-![](https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_2.png =150*138)  | ![](https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_3.png) | ![](https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_4.png)
+<img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_2.png" width="150" height="138"/>
+![](https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_3.png) | ![](https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_4.png)
 
 Allow for interactive exploration of the Mandelbrot fractal
 
