@@ -2,6 +2,8 @@
 
 Mandelbrot explorer using SDL2
 
+<img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_2.png" width="600" height="412"/> | <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_3.png" width="600" height="412"/> | <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_4.png" width="600" height="412"/>
+
 Allow for interactive exploration of the Mandelbrot fractal
 
 # Controls
@@ -15,6 +17,8 @@ Allow for interactive exploration of the Mandelbrot fractal
 - Use p to define a new number of iterations, then type the new number and press Enter
 
 ## Julia fractals
+
+![](https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_5.png)
 
 ### To generate the Julia fractal corresponding to a specific point you are seeing on the screen, you must first :
 
