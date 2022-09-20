@@ -2,12 +2,20 @@
 
 Mandelbrot explorer using SDL2
 
-Stores the images in a pics file (modify the path in the source code)
+Allow for interactive exploration of the Mandelbrot fractal
 
+# Controls
 
+Zoom in with click and drag
 
-# Future updates
+Use k or ESC to kill the application
 
-add a ./configure
-allow for string printing inside the SDL window rather than in terminal
-create a help page
+Use b to load the previous picture
+
+Use p to define a new number of iterations, then type the new number and press Enter
+
+# Installation
+
+Change the SAVE_FILE constant inside the bmp/sdl_input.h file to an existing path on your machine
+
+Compile with make
