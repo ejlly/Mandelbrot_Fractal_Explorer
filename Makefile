@@ -1,21 +1,15 @@
-# A simple Makefile for compiling small SDL projects
-
-# set the compiler
 CC := clang++
 
-# set the compiler flags
-CFLAGS := `sdl2-config --libs --cflags` -O2 -Wall -lSDL2_image
-# add header files here
-#HDRS :=
-
-# add source files here
-SRCS := main.cpp bmp/bmp.cpp bmp/sdlinput.cpp
+CFLAGS := `sdl2-config --libs --cflags` -O2 -Wall -lSDL2_image -fsycl
+HDRS := src/sdlinput.h src/bmp.h src/params.h
+SRCS := src/main.cpp src/bmp.cpp src/sdlinput.cpp
 
 # generate names of object files
-OBJS := $(SRCS:.c=.o)
+OBJDIR := objs/
+OBJS := $(SRCS:.cpp=.o)
 
 # name of executable
-EXEC := exec
+EXEC := gpu_accel
 
 # default recipe
 all: $(EXEC)
@@ -30,9 +24,8 @@ glfont: glfont.c Makefile
 $(EXEC): $(OBJS)  Makefile
 	$(CC) -o $@ $(OBJS) $(CFLAGS)
 
-# recipe for building object files
-#$(OBJS): $(@:.o=.c) $(HDRS) Makefile
-#    $(CC) -o $@ $(@:.o=.c) -c $(CFLAGS)
+$(OBJS): $(@:.o=.cpp) $(HDRS) Makefile
+	$(CC) -o $@ $(@:.o=.cpp) -c $(CFLAGS)
 
 # recipe to clean the workspace
 clean:
