@@ -20,7 +20,7 @@ Allow for interactive exploration of the Mandelbrot fractal
 
 ![](https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_5.png)
 
-### To generate the Julia fractal corresponding to a specific point you are seeing on the screen, you must first :
+### To generate the Julia fractal corresponding to a specific point you are seeing on the screen, you must :
 
 - Press n on your keyboard
 
