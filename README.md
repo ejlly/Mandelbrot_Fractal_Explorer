@@ -6,17 +6,13 @@ Allow for interactive exploration of the Mandelbrot fractal
 
 # Controls
 
-\begin{itemize}
+- Zoom in with click and drag
 
-\item Zoom in with click and drag
+- Use k or ESC to kill the application
 
-\item Use k or ESC to kill the application
+- Use b to load the previous picture
 
-\item Use b to load the previous picture
-
-\item Use p to define a new number of iterations, then type the new number and press Enter
-
-\end{itemize}
+- Use p to define a new number of iterations, then type the new number and press Enter
 
 ## Julia fractals
 
