@@ -1,10 +1,8 @@
 #ifndef BMP_HEADER_PERSO
 #define BMP_HEADER_PERSO
 
-#include <memory>
+#include <vector>
 #include <string>
-
-typedef unsigned char uc;
 
 typedef unsigned char uc;
 
@@ -32,12 +30,12 @@ class Pixel{
 class BMP_Picture{
 	private:
 		int width, height;
-		std::unique_ptr<Pixel[]> pixels;
+		std::vector<Pixel> pixels;
 
 	public:
 		BMP_Picture();
 		BMP_Picture(int w, int h);
-		BMP_Picture(int w, int h, Pixel *pixels_tab);
+		BMP_Picture(int w, int h, std::vector<Pixel> pixels_tab);
 
 		int get_width();
 		int get_height();
