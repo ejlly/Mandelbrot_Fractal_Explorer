@@ -1,10 +1,10 @@
 MandelExplorer
 exec
 tags
-src/
 pics/
 captures/
 recover/
+src/*.o
 bmp/*.bmp
 bmp/a.out
 bmp/test.cpp

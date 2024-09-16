@@ -1,9 +1,9 @@
-#include "sdlinput.h"
-#include "params.h"
+#include "sdlinput.hpp"
 
 
 int pool_int(){
 	int k = 0;
+  /*
 	SDL_Event event; //TODO: use same SDL_Event object as in main loop
 	while(SDL_WaitEvent(&event)){
 		switch(event.type){
@@ -71,11 +71,13 @@ int pool_int(){
 				break;
 		}
 	}
+  */
 	return k;
 }
 
 
 void init_mem_pics(Mem_pics &memory){
+  /*
 	memory.pics_count = 0;
 
 	//Generate date
@@ -102,9 +104,11 @@ void init_mem_pics(Mem_pics &memory){
 
 
 	memory.img = BMP_Picture(WIDTH, HEIGHT);
+  */
 }
 
 void calculate_frame(Mem_pics &memory, bool recalculate, bool drawsJulia){
+  /*
 	printf("calculating...\n");
 	ld x = 0, y = 0, x2 = 0, y2 = 0, x0 = 0, y0 = 0;
 	int n = 0;
@@ -168,10 +172,13 @@ void calculate_frame(Mem_pics &memory, bool recalculate, bool drawsJulia){
 	printf("Saved picture as %s\n", memory.pics_titles.front().c_str());
 
 	//printf("done\n");
+  */
 }
 
 
 void update_screen(SDL_objs &sdl_objs, Mem_pics const& memory){
+  return;
+  /*
 	std::string pix_title = SAVE_FILE + memory.pics_titles.front();
 
 	SDL_Surface *to_plot_img = SDL_LoadBMP(pix_title.c_str());
@@ -186,9 +193,11 @@ void update_screen(SDL_objs &sdl_objs, Mem_pics const& memory){
 		printf("Failed blit image\n");
 
 	SDL_FreeSurface(to_plot_img);
+  */
 }
 
 bool revert_frame(Mem_pics &memory){
+  /*
 	if(memory.pics_titles.size() <= 1)
 		return false;
 
@@ -201,11 +210,12 @@ bool revert_frame(Mem_pics &memory){
 	memory.values_record.pop_front();
 
 
+  */
 	return true;
 }
 
 bool zoom(Mem_pics &memory, int sto_x, int sto_y, int mouse_x, int mouse_y){
-
+  /*
 	memory.values_record.push_front(memory.a);
 	memory.values_record.push_front(memory.b);
 
@@ -238,10 +248,12 @@ bool zoom(Mem_pics &memory, int sto_x, int sto_y, int mouse_x, int mouse_y){
 		return true;
 	}
 
+  */
 	return false;
 }
 
 void init_SDL_objs(SDL_objs &sdl_objs){
+  /*
 	if(SDL_Init(SDL_INIT_VIDEO) != 0) {
 		printf("Error initializing SDL: %s\n", SDL_GetError());
 	}
@@ -250,15 +262,19 @@ void init_SDL_objs(SDL_objs &sdl_objs){
 	sdl_objs.ren_surface = SDL_GetWindowSurface(sdl_objs.win);
 
 	memset(&sdl_objs.in, 0, sizeof(sdl_objs.in));
+  */
 }
 
 void kill_sdl(SDL_objs &sdl_objs){
+  /*
 	SDL_FreeSurface(sdl_objs.ren_surface);
 	SDL_DestroyWindow(sdl_objs.win);
 	SDL_Quit();
+  */
 }
 
 int catch_julia_press(SDL_objs &sdl_objs, Complex &origin, Mem_pics &memory, int mouse_x, int mouse_y){
+  /*
 	while(SDL_WaitEvent(&sdl_objs.events)){
 		switch(sdl_objs.events.type){
 			case SDL_QUIT: 
@@ -287,13 +303,14 @@ int catch_julia_press(SDL_objs &sdl_objs, Complex &origin, Mem_pics &memory, int
 
 		}
 	}
-
+  */
 	return 2;
 
 }
 
 bool main_loop(SDL_objs &sdl_objs, Complex &origin, bool drawsJulia){
-
+  return true;
+  /*
 	//Mouse coordinates
 	int mouse_x(0), mouse_y(0);
 	int sto_x(0), sto_y(0);
@@ -387,5 +404,6 @@ bool main_loop(SDL_objs &sdl_objs, Complex &origin, bool drawsJulia){
 				break;
 		}
 	}
+  */
 	return false;
 }

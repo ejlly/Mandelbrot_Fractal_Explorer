@@ -1,8 +1,7 @@
 #include <SDL2/SDL.h>
-#include <iostream>
 #include <cmath>
 
-#include "sdlinput.h"
+#include "sdlinput.hpp"
 
 
 int main(int argc, char* argv[]){
