@@ -3,6 +3,7 @@ exec
 tags
 src/
 pics/
+captures/
 recover/
 bmp/*.bmp
 bmp/a.out

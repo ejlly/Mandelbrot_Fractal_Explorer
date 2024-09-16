@@ -2,7 +2,6 @@
 #include <iostream>
 #include <cmath>
 
-#include "bmp.h"
 #include "sdlinput.h"
 
 
