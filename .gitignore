@@ -1,0 +1,9 @@
+MandelExplorer
+exec
+tags
+src/
+pics/
+recover/
+bmp/*.bmp
+bmp/a.out
+bmp/test.cpp
