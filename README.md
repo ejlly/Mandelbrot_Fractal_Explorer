@@ -1,6 +1,6 @@
 # Mandelbrot Fractal Explorer
 
-Mandelbrot explorer using SDL2
+Mandelbrot explorer using opengl
 
 <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_2.png" width="334" height="223"/> <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_3.png" width="334" height="223"/> <img src="https://github.com/ejlly/Mandelbrot_Fractal_Explorer/blob/main/captures/Capture_6.png" width="334" height="223"/>
 
