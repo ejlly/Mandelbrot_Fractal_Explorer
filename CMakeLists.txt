@@ -1,12 +1,33 @@
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 project(mandel)
 set(CMAKE_MODULE_PATH /home/charles/Libs/cmake)
 set (CMAKE_CXX_STANDARD 17)
+
 
 # Add source files
 file(GLOB_RECURSE SOURCE_FILES 
 	${CMAKE_SOURCE_DIR}/src/*.c
 	${CMAKE_SOURCE_DIR}/src/*.cpp
+)
+
+
+# Set optimization or debug flags
+
+# Set default build type to Release if not specified
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Set flags for Release and Debug
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+
+# Custom debug target
+add_custom_target(debug
+	COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Debug -B ${CMAKE_BINARY_DIR}/debug -S ${CMAKE_SOURCE_DIR}
+	COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/debug
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	COMMENT "Building debug version in ./debug directory"
 )
 
 	

@@ -7,9 +7,9 @@ Pixel::Pixel() : r(0), g(0), b(0) {};
 Pixel::Pixel(uc p_r, uc p_g, uc p_b) :
 	r(p_r), g(p_g), b(p_b) {};
 
-uc Pixel::get_r(){return r;}
-uc Pixel::get_g(){return g;}
-uc Pixel::get_b(){return b;}
+uc Pixel::get_r() const {return r;}
+uc Pixel::get_g() const {return g;}
+uc Pixel::get_b() const {return b;}
 
 void Pixel::set_r(uc p_r){r = p_r;}
 void Pixel::set_g(uc p_g){g = p_g;}
@@ -22,10 +22,16 @@ BMP_Picture::BMP_Picture(int w, int h) :
 BMP_Picture::BMP_Picture(int w, int h, std::vector<Pixel> pixels_tab) :
 	width(w), height(h), pixels(pixels_tab) {};
 
-int BMP_Picture::get_width(){return width;}
-int BMP_Picture::get_height(){return height;}
+int BMP_Picture::get_width() const { return width; }
+int BMP_Picture::get_height() const { return height; }
 
 Pixel& BMP_Picture::operator()(int i, int j){
+	if(i < 0 || i > height || j < 0 || j > width)
+		throw std::invalid_argument("Out of BMP bounds");
+	return pixels[i*width + j];
+}
+
+Pixel const& BMP_Picture::operator()(int i, int j) const {
 	if(i < 0 || i > height || j < 0 || j > width)
 		throw std::invalid_argument("Out of BMP bounds");
 	return pixels[i*width + j];

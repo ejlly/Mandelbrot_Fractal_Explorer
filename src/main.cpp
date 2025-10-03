@@ -1,19 +1,11 @@
-#include <SDL2/SDL.h>
-#include <cmath>
+#include "window.hpp"
 
-#include "sdlinput.hpp"
+int main(int argc, char* argv[]) {
+	int const width = 1500, height = 900;
+	Window glWindow(width, height);
+	glWindow.init(std::string("Mandelbrot Explorer"));
 
-
-int main(int argc, char* argv[]){
-	SDL_objs sdl_objs;
-	init_SDL_objs(sdl_objs);
-
-
-	Complex origin;
-
-	if(main_loop(sdl_objs, origin, false)){
-		
-	}
+	glWindow.main_loop();
 
 	return 0;
 }

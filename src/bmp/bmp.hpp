@@ -16,9 +16,9 @@ class Pixel{
 		Pixel();
 		Pixel(uc p_r, uc p_g, uc p_b);
 
-		uc get_r();
-		uc get_g();
-		uc get_b();
+		uc get_r() const;
+		uc get_g() const;
+		uc get_b() const;
 
 		void set_r(uc p_r);
 		void set_g(uc p_g);
@@ -38,10 +38,11 @@ class BMP_Picture{
 		BMP_Picture(int w, int h);
 		BMP_Picture(int w, int h, std::vector<Pixel> pixels_tab);
 
-		int get_width();
-		int get_height();
+		int get_width() const;
+		int get_height() const;
 
 		Pixel& operator()(int i, int j);
+		Pixel const& operator()(int i, int j) const;
 		
 		void save_BMP(const char* path);
 		void save_BMP(std::string &path);
