@@ -44,7 +44,7 @@ Plot::Plot(int width, int height, Complex const& _bottom_left, Complex const& _t
 }
 
 void calculate_frame(Window &glWindow, Plot &memory, bool recalculate, bool drawsJulia) {
-	printf("calculating...\n");
+	//printf("calculating...\n");
 
 	int const width = glWindow.getwidth();
 	int const height = glWindow.getheight();
@@ -77,14 +77,14 @@ void calculate_frame(Window &glWindow, Plot &memory, bool recalculate, bool draw
 				x2 = x*x;
 				y2 = y*y;
 
-				while(x2 + y2 <= 4 && n++ < memory.nb_its){
+				while(x2 + y2 <= 4 && n++ < glWindow.get_nb_its()){
 					y =	(x+x)*y + y0;
 					x =	x2 - y2	+ x0;
 					x2 = x*x;
 					y2 = y*y;
 				}
 
-				if(n >= memory.nb_its-1)
+				if(n >= glWindow.get_nb_its()-1)
 					memory.img(c_x, c_y).set_c(0,0,0);
 				else{
 

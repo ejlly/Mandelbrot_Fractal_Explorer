@@ -1,8 +1,13 @@
 #include <cassert>
 
+
 #include "window.hpp"
 #include "keys.hpp"
 #include "mandel_calculation.hpp"
+
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 
 Window::Window(int _width, int _height){
 	width = _width;
@@ -34,6 +39,10 @@ int Window::getwidth(){
 
 int Window::getheight(){
 	return height;
+}
+
+int Window::get_nb_its(){
+	return nb_its;
 }
 
 bool Window::add_plot(int sto_x, int sto_y, int mouse_x, int mouse_y) {
@@ -143,6 +152,16 @@ void Window::init(std::string const title) {
 
     glBindVertexArray(0);
 
+
+    //ImGUI initialization
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
 	dragSelectionProgram.init("/home/nabboutc/Documents/misc_alg/cpp_train/mandel/src/shaders/color.vs",
                        "/home/nabboutc/Documents/misc_alg/cpp_train/mandel/src/shaders/color.fs");
 
@@ -233,23 +252,60 @@ void Window::update_drag_box() {
 
 bool Window::main_loop() {
     memory.push_back(Plot(width, height));
-
     calculate_frame(*this, memory.back(), false, false);
-
     update_fractal(memory.back().img);
 
-	glfwSetKeyCallback(window, key_callback);
+    // Bind AntTweakBar variable to memory.nb_its
+    //TwRemoveAllVars(TwGetBarByName("Settings"));
+
+    glfwSetKeyCallback(window, key_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetCursorPosCallback(window, cursor_position_callback);
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        update_fractal(memory.back().img);
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
+        ImGui::Begin("Controls");
+        static bool use_input = false;
+        static bool input_just_activated = false;
+        ImGuiIO& io = ImGui::GetIO();
+        if (ImGui::IsKeyPressed(ImGuiKey_P)) {
+            use_input = true;
+            input_just_activated = true;
+        }
+        if (use_input) {
+            ImGui::SetNextItemWidth(300);
+            if (input_just_activated) {
+                ImGui::SetKeyboardFocusHere();
+                input_just_activated = false;
+            }
+            bool changed = ImGui::InputInt("Precision", &nb_its, 1, 100);
+            if (changed || !ImGui::IsItemActive()) {
+                use_input = false;
+            }
+        } else {
+            if (ImGui::IsItemActive()) {
+                ImGui::SetNextItemWidth(300);
+            }
+            ImGui::SliderInt("Precision", &nb_its, 1, 25000);
+        }
+        ImGui::End();
+
+        update_fractal(memory.back().img);
         update_drag_box();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     return true;
 }

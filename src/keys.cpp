@@ -1,15 +1,23 @@
 #include <GL/glew.h>
-
 #include "keys.hpp"
 #include "window.hpp"
 #include "mandel_calculation.hpp"
 
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mode);
+    if (ImGui::GetIO().WantCaptureKeyboard)
+        return;
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+    if (ImGui::GetIO().WantCaptureMouse)
+        return;
     Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     DragState& drag = win->get_drag_state();
 
@@ -41,6 +49,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+    if (ImGui::GetIO().WantCaptureMouse)
+        return;
     Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     DragState& drag = win->get_drag_state();
 

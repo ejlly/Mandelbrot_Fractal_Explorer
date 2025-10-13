@@ -59,7 +59,6 @@ struct Complex {
 
 class Plot {
 	public:
-		int nb_its = 100;
 		BMP_Picture img;
 		Complex bottom_left, top_right, origin;
 
@@ -76,6 +75,7 @@ class Window{
 		int width, height;
 
         GLuint VAO, VBO, EBO;
+		int nb_its = 100;
 
         DrawingProgram shaderProgram, dragSelectionProgram;
 
@@ -92,6 +92,7 @@ class Window{
 		void setWindow(GLFWwindow* _window);
 		int getwidth();
 		int getheight();
+		int get_nb_its();
 
         bool add_plot(int sto_x, int sto_y, int mouse_x, int mouse_y);
 
