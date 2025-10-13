@@ -27,6 +27,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             drag.dragging = true;
             drag.endX = drag.startX;
             drag.endY = drag.startY;
+            drag.dirty = true;
         }
         else if (drag.dragging && action == GLFW_RELEASE) {
             glfwGetCursorPos(window, &drag.endX, &drag.endY);

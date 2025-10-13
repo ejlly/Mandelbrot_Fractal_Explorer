@@ -111,7 +111,8 @@ void Window::init(std::string const title) {
 		fprintf(stderr, "Failed to initialize GLEW\n");
 		exit(EXIT_FAILURE);
 	}
-	glViewport(0, 0, width, height);
+    glViewport(0, 0, width, height);
+    glfwSwapInterval(1); // Enable VSync to reduce CPU usage
 
     glfwSetWindowUserPointer(window, this);
 
@@ -262,9 +263,8 @@ bool Window::main_loop() {
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetCursorPosCallback(window, cursor_position_callback);
 
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
 
+    auto draw_imgui_ui = [&]() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -300,7 +300,14 @@ bool Window::main_loop() {
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    };
 
+    draw_imgui_ui();    
+    glfwSwapBuffers(window);
+
+    while (!glfwWindowShouldClose(window)) {
+        glfwWaitEvents();
+        draw_imgui_ui();
         glfwSwapBuffers(window);
     }
 
