@@ -76,6 +76,7 @@ class Window{
 
         GLuint VAO, VBO, EBO;
 		int nb_its = 100;
+		int memory_index = 0;
 
         DrawingProgram shaderProgram, dragSelectionProgram;
 
@@ -93,6 +94,12 @@ class Window{
 		int getwidth();
 		int getheight();
 		int get_nb_its();
+
+		int get_memory_index();
+		int get_memory_size();
+		void set_memory_index(int index);
+
+		Plot& get_last_plot();
 
         bool add_plot(int sto_x, int sto_y, int mouse_x, int mouse_y);
 

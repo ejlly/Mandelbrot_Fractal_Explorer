@@ -45,7 +45,7 @@ class BMP_Picture{
 		Pixel const& operator()(int i, int j) const;
 		
 		void save_BMP(const char* path);
-		void save_BMP(std::string &path);
+		void save_BMP(std::string const& path);
 };
 
 #endif

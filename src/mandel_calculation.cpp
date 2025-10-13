@@ -43,7 +43,7 @@ Plot::Plot(int width, int height, Complex const& _bottom_left, Complex const& _t
 	img_title = date + bottom_left.to_string() + "_" + top_right.to_string() + ".bmp";
 }
 
-void calculate_frame(Window &glWindow, Plot &memory, bool recalculate, bool drawsJulia) {
+void calculate_frame(Window &glWindow, Plot &plot, bool recalculate, bool drawsJulia) {
 	//printf("calculating...\n");
 
 	int const width = glWindow.getwidth();
@@ -60,18 +60,18 @@ void calculate_frame(Window &glWindow, Plot &memory, bool recalculate, bool draw
 	for(int i(0); i<width; i++){
 		for(int j(0); j<height; j++){
 			int const c_x = height - j - 1, c_y = i;
-			if(!recalculate || (memory.img(c_x, c_y).get_r() == 0 && memory.img(c_x, c_y).get_g() == 0 && memory.img(c_x, c_y).get_b() == 0)){
+			if(!recalculate || (plot.img(c_x, c_y).get_r() == 0 && plot.img(c_x, c_y).get_g() == 0 && plot.img(c_x, c_y).get_b() == 0)){
 				n = 0;
 
-				x = memory.bottom_left.x + i*(memory.top_right.x - memory.bottom_left.x)/width;
-				y = memory.bottom_left.y + j*(memory.top_right.y - memory.bottom_left.y)/height;
+				x = plot.bottom_left.x + i*(plot.top_right.x - plot.bottom_left.x)/width;
+				y = plot.bottom_left.y + j*(plot.top_right.y - plot.bottom_left.y)/height;
 				if(!drawsJulia){
 					x0 = x;
 					y0 = y;
 				}
 				else{
-					x0 = memory.origin.x;
-					y0 = memory.origin.y;
+					x0 = plot.origin.x;
+					y0 = plot.origin.y;
 				}
 
 				x2 = x*x;
@@ -85,19 +85,19 @@ void calculate_frame(Window &glWindow, Plot &memory, bool recalculate, bool draw
 				}
 
 				if(n >= glWindow.get_nb_its()-1)
-					memory.img(c_x, c_y).set_c(0,0,0);
+					plot.img(c_x, c_y).set_c(0,0,0);
 				else{
 
 					long double const h = std::fmod(std::sqrt(n)*20, 360L);
 
 					long double const x = c*(1 - std::abs(std::fmod(h/60, 2L) - 1));
 
-					if(h <= 60)        memory.img(c_x, c_y).set_c(static_cast<int>((c+m)*255), static_cast<int>((x+m)*255), static_cast<int>(m*255));
-					else if (h <= 120) memory.img(c_x, c_y).set_c(static_cast<int>((x+m)*255), static_cast<int>((c+m)*255), static_cast<int>(m*255));
-					else if (h <= 180) memory.img(c_x, c_y).set_c(static_cast<int>(m*255)    , static_cast<int>((c+m)*255), static_cast<int>((x+m)*255));
-					else if (h <= 240) memory.img(c_x, c_y).set_c(static_cast<int>(m*255)    , static_cast<int>((x+m)*255), static_cast<int>((c+m)*255));
-					else if (h <= 300) memory.img(c_x, c_y).set_c(static_cast<int>((x+m)*255), static_cast<int>(m*255)    , static_cast<int>((c+m)*255));
-					else               memory.img(c_x, c_y).set_c(static_cast<int>((c+m)*255), static_cast<int>(m*255)    , static_cast<int>((x+m)*255));
+					if(h <= 60)        plot.img(c_x, c_y).set_c(static_cast<int>((c+m)*255), static_cast<int>((x+m)*255), static_cast<int>(m*255));
+					else if (h <= 120) plot.img(c_x, c_y).set_c(static_cast<int>((x+m)*255), static_cast<int>((c+m)*255), static_cast<int>(m*255));
+					else if (h <= 180) plot.img(c_x, c_y).set_c(static_cast<int>(m*255)    , static_cast<int>((c+m)*255), static_cast<int>((x+m)*255));
+					else if (h <= 240) plot.img(c_x, c_y).set_c(static_cast<int>(m*255)    , static_cast<int>((x+m)*255), static_cast<int>((c+m)*255));
+					else if (h <= 300) plot.img(c_x, c_y).set_c(static_cast<int>((x+m)*255), static_cast<int>(m*255)    , static_cast<int>((c+m)*255));
+					else               plot.img(c_x, c_y).set_c(static_cast<int>((c+m)*255), static_cast<int>(m*255)    , static_cast<int>((x+m)*255));
 				}
 			}
 		}

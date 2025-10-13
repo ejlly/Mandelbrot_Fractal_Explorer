@@ -72,6 +72,6 @@ void BMP_Picture::save_BMP(const char* path){
   img_file.close();
 }
 
-void BMP_Picture::save_BMP(std::string &path){
+void BMP_Picture::save_BMP(std::string const&path){
 	this->save_BMP(path.c_str());
 }

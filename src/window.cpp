@@ -45,11 +45,27 @@ int Window::get_nb_its(){
 	return nb_its;
 }
 
+int Window::get_memory_index() {
+    return memory_index;
+}
+int Window::get_memory_size() {
+    return static_cast<int>(memory.size());
+}
+void Window::set_memory_index(int index) {
+    assert(index >= 0 && index < static_cast<int>(memory.size()));
+    memory_index = index;
+}
+
+Plot& Window::get_last_plot() {
+    assert(!memory.empty());
+    return memory.back();
+}
+
 bool Window::add_plot(int sto_x, int sto_y, int mouse_x, int mouse_y) {
     //implements the zoom, returns true if success
 
     assert(memory.size() > 0);
-    Plot& plot = memory.back();
+    Plot& plot = memory[memory_index];
 
 	if(mouse_x == sto_x || mouse_y == sto_y) return false;
 
@@ -80,9 +96,15 @@ bool Window::add_plot(int sto_x, int sto_y, int mouse_x, int mouse_y) {
     Complex const new_top_right(plot.top_right.x - (width - bottom_right_x) * abscisse/width,
                                 plot.top_right.y - top_left_y * ordonnee/height);
 
-    memory.push_back(Plot(width, height, new_bottom_left, new_top_right));
 
-    calculate_frame(*this, memory.back(), false, false);
+    if (memory_index + 1 < get_memory_size()) {
+        memory.erase(memory.begin() + memory_index + 1, memory.end());
+        memory_index = static_cast<int>(memory.size()) - 1;
+    }
+    memory_index++;
+
+    memory.push_back(Plot(width, height, new_bottom_left, new_top_right));
+    calculate_frame(*this, memory[memory_index], false, false);
 
     return true;
 }
@@ -253,8 +275,8 @@ void Window::update_drag_box() {
 
 bool Window::main_loop() {
     memory.push_back(Plot(width, height));
-    calculate_frame(*this, memory.back(), false, false);
-    update_fractal(memory.back().img);
+    calculate_frame(*this, memory[memory_index], false, false);
+    update_fractal(memory[memory_index].img);
 
     // Bind AntTweakBar variable to memory.nb_its
     //TwRemoveAllVars(TwGetBarByName("Settings"));
@@ -295,7 +317,7 @@ bool Window::main_loop() {
         }
         ImGui::End();
 
-        update_fractal(memory.back().img);
+        update_fractal(memory[memory_index].img);
         update_drag_box();
 
         ImGui::Render();

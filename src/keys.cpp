@@ -13,16 +13,36 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (ImGui::GetIO().WantCaptureKeyboard)
         return;
+    
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
-
-    if(key == GLFW_KEY_R && action == GLFW_RELEASE) {
+    
+    if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_A) && action == GLFW_PRESS) {
+        int const memory_index = win->get_memory_index();
+        if (memory_index > 0) {
+            win->set_memory_index(memory_index - 1);
+        }
+    }
+    else if ((key == GLFW_KEY_RIGHT || key == GLFW_KEY_E) && action == GLFW_PRESS) {
+        int const memory_index = win->get_memory_index();
+        if (win->get_memory_index() + 1 < win->get_memory_size()) {
+            win->set_memory_index(memory_index + 1);
+        }
+    }
+    else if(key == GLFW_KEY_R && action == GLFW_RELEASE) {
         //redraw
 
         drag.dragging = false;
         drag.dirty = false;
 
         win->add_plot(0, 0, win->getwidth()-1, win->getheight()-1);
+    }
+    else if(key == GLFW_KEY_S && action == GLFW_RELEASE) {
+        //save current image
+        Plot& plot = win->get_last_plot();
+        std::string const filepath = "pics/" + plot.img_title;
+        plot.img.save_BMP(filepath);
+        printf("Saved picture as %s\n", filepath.c_str());
     }
 }
 
