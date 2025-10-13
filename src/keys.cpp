@@ -8,10 +8,22 @@
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
     ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mode);
+    Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    DragState& drag = win->get_drag_state();
+
     if (ImGui::GetIO().WantCaptureKeyboard)
         return;
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+
+    if(key == GLFW_KEY_R && action == GLFW_RELEASE) {
+        //redraw
+
+        drag.dragging = false;
+        drag.dirty = false;
+
+        win->add_plot(0, 0, win->getwidth()-1, win->getheight()-1);
+    }
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
