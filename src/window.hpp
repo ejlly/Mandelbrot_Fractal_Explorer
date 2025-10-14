@@ -62,11 +62,15 @@ class Plot {
 		BMP_Picture img;
 		Complex bottom_left, top_right, origin;
 
+		bool isJulia = false;
+
 		std::string date, img_title;
 	
 		Plot();
 		Plot(int width, int height);
+		Plot(int width, int height, Complex const& _origin);
 		Plot(int width, int height, Complex const& _bottom_left, Complex const& _top_right);
+		Plot(int width, int height, Complex const& _bottom_left, Complex const& _top_right, Complex const& _origin);
 };
 
 class Window{
@@ -82,8 +86,8 @@ class Window{
 
         DragState drag;
 
-        std::vector<Plot> memory;
-	
+		std::vector<Plot> memory;
+
 	public:
 		Window(int _width, int _height);
 		Window();
@@ -91,8 +95,11 @@ class Window{
 
 		GLFWwindow* getaddr();
 		void setWindow(GLFWwindow* _window);
+
 		int getwidth();
+		void setwidth(int w);
 		int getheight();
+		void setheight(int h);
 		int get_nb_its();
 
 		int get_memory_index();
@@ -101,7 +108,8 @@ class Window{
 
 		Plot& get_last_plot();
 
-        bool add_plot(int sto_x, int sto_y, int mouse_x, int mouse_y);
+        bool add_plot(int sto_x, int sto_y, int mouse_x, int mouse_y, bool recalculate=false);
+		bool add_julia_plot(int mouse_x, int mouse_y);
 
         DragState& get_drag_state();
 

@@ -25,7 +25,7 @@ GLuint Program::loadShader(char const *shader_file_path, GLenum shaderType){
 	
 	char const *shaderCode = shaderCodeString.c_str();
 
-	std::cout << "Compiling shader : " << shader_file_path << std::endl;
+	//std::cout << "Compiling shader : " << shader_file_path << std::endl;
 
 	glShaderSource(shaderID, 1, &shaderCode, nullptr);
 	glCompileShader(shaderID);
@@ -69,7 +69,7 @@ GLuint Program::loadShaderWithPrefix(char const *shader_file_path, char const *p
 
 	//std::cout << "DEBUG :\n" << shaderCodeString << std::endl;
 
-	std::cout << "Compiling shader : " << shader_file_path << std::endl;
+	//std::cout << "Compiling shader : " << shader_file_path << std::endl;
 
 	glShaderSource(shaderID, 1, &shaderCode, nullptr);
 	glCompileShader(shaderID);
@@ -312,7 +312,7 @@ void DrawingProgram::init(char const* vs, char const *fs) {
 	GLuint vsID = loadShader(vs, GL_VERTEX_SHADER);
 	GLuint fsID = loadShader(fs, GL_FRAGMENT_SHADER);
 
-	std::cout << "Linking drawing program\n";
+	//std::cout << "Linking drawing program\n";
 
 	programID = glCreateProgram();
 	glAttachShader(programID, vsID);
@@ -348,7 +348,7 @@ GLuint DrawingProgram::getID() {
 ComputeProgram::ComputeProgram(char const *cs){
 	GLuint csID = loadShader(cs, GL_COMPUTE_SHADER);
 
-	std::cout << "Linking compute program\n";
+	//std::cout << "Linking compute program\n";
 
 	programID = glCreateProgram();
 	glAttachShader(programID, csID);
@@ -376,7 +376,7 @@ ComputeProgram::ComputeProgram(char const *cs){
 ComputeProgram::ComputeProgram(char const *cs, char const *prefix){
 	GLuint csID = loadShaderWithPrefix(cs, prefix, GL_COMPUTE_SHADER);
 
-	std::cout << "Linking compute program\n";
+	//std::cout << "Linking compute program\n";
 
 	programID = glCreateProgram();
 	glAttachShader(programID, csID);

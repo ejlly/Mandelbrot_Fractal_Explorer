@@ -8,7 +8,7 @@
 
 #include "window.hpp"
 
-void calculate_frame(Window &glWindow, Plot &plot, bool recalculate, bool drawsJulia);
+void calculate_frame(Window &glWindow, Plot &plot, bool recalculate);
 
 bool revert_frame(std::vector<Plot> &memory);
 

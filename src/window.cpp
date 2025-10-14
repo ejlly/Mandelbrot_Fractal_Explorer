@@ -1,4 +1,5 @@
 #include <cassert>
+#include <ctime>
 
 
 #include "window.hpp"
@@ -9,11 +10,54 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
+Plot::Plot() {
+	//Generate date
+	time_t const cur_time = std::time(NULL);
+	date = std::asctime(std::localtime(&cur_time)); 
+	date[19] = ',';
+	date.erase(0, 4);
+}
+
+Plot::Plot(int width, int height) : Plot() {
+
+	if (width >= height) {
+		bottom_left = Complex(-2.*width/height, -2);
+		top_right = Complex(2.*width/height, 2);
+	}
+	else {
+		bottom_left = Complex(-2, -2.*height/width);
+		top_right = Complex(2, 2.*height/width);
+	}
+
+	//bottom_left = Complex(0, 0);
+	//top_right = Complex(1, 1.5);
+
+	img = BMP_Picture(width, height);
+	img_title = date + bottom_left.to_string() + "_" + top_right.to_string() + ".bmp";
+}
+
+Plot::Plot(int width, int height, Complex const& _origin) : Plot(width, height) {
+    isJulia = true;
+    origin = _origin;
+}
+
+Plot::Plot(int width, int height, Complex const& _bottom_left, Complex const& _top_right) : Plot() {
+	bottom_left = _bottom_left;
+	top_right = _top_right;
+
+	img = BMP_Picture(width, height);
+	img_title = date + bottom_left.to_string() + "_" + top_right.to_string() + ".bmp";
+}
+
+Plot::Plot(int width, int height, Complex const& _bottom_left, Complex const& _top_right, Complex const& _origin) :
+    Plot(width, height, _bottom_left, _top_right) {
+        isJulia = true;
+        origin = _origin;
+}
+
 Window::Window(int _width, int _height){
 	width = _width;
 	height = _height;
-
-    //glfwMakeContextCurrent(window);
 }
 
 Window::Window(){
@@ -37,8 +81,16 @@ int Window::getwidth(){
 	return width;
 }
 
+void Window::setwidth(int w) {
+    width = w;
+}
+
 int Window::getheight(){
 	return height;
+}
+
+void Window::setheight(int h) {
+    height = h;
 }
 
 int Window::get_nb_its(){
@@ -61,7 +113,7 @@ Plot& Window::get_last_plot() {
     return memory.back();
 }
 
-bool Window::add_plot(int sto_x, int sto_y, int mouse_x, int mouse_y) {
+bool Window::add_plot(int sto_x, int sto_y, int mouse_x, int mouse_y, bool recalculate) {
     //implements the zoom, returns true if success
 
     assert(memory.size() > 0);
@@ -102,9 +154,36 @@ bool Window::add_plot(int sto_x, int sto_y, int mouse_x, int mouse_y) {
         memory_index = static_cast<int>(memory.size()) - 1;
     }
     memory_index++;
+    if(!plot.isJulia)
+        memory.push_back(Plot(width, height, new_bottom_left, new_top_right));
+    else
+        memory.push_back(Plot(width, height, new_bottom_left, new_top_right, plot.origin));
+    calculate_frame(*this, memory[memory_index], recalculate);
 
-    memory.push_back(Plot(width, height, new_bottom_left, new_top_right));
-    calculate_frame(*this, memory[memory_index], false, false);
+    return true;
+}
+
+bool Window::add_julia_plot(int mouse_x, int mouse_y) {
+    //implements the zoom, returns true if success
+
+    assert(memory.size() > 0);
+    Plot& plot = memory[memory_index];
+
+    long double const abscisse(plot.top_right.x - plot.bottom_left.x),
+                      ordonnee(plot.top_right.y - plot.bottom_left.y);
+
+    Complex const new_origin(plot.bottom_left.x + mouse_x * abscisse/width,
+                             plot.bottom_left.y + (height - mouse_y) * ordonnee/height);
+    
+
+    if (memory_index + 1 < get_memory_size()) {
+        memory.erase(memory.begin() + memory_index + 1, memory.end());
+        memory_index = static_cast<int>(memory.size()) - 1;
+    }
+    memory_index++;
+
+    memory.push_back(Plot(width, height, new_origin));
+    calculate_frame(*this, memory[memory_index], false);
 
     return true;
 }
@@ -121,6 +200,7 @@ void Window::init(std::string const title) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 	window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 	if (!window) {
 		fprintf(stderr, "Failed to create GLFW window\n");
@@ -275,7 +355,7 @@ void Window::update_drag_box() {
 
 bool Window::main_loop() {
     memory.push_back(Plot(width, height));
-    calculate_frame(*this, memory[memory_index], false, false);
+    calculate_frame(*this, memory[memory_index], false);
     update_fractal(memory[memory_index].img);
 
     // Bind AntTweakBar variable to memory.nb_its
@@ -292,26 +372,45 @@ bool Window::main_loop() {
         ImGui::NewFrame();
 
         ImGui::Begin("Controls");
-        static bool use_input = false;
-        static bool input_just_activated = false;
+        static bool use_input_precision = false;
+        static bool input_just_activated_precision = false;
+
+        static bool waiting_for_julia_origin = false;
         ImGuiIO& io = ImGui::GetIO();
-        if (ImGui::IsKeyPressed(ImGuiKey_P)) {
-            use_input = true;
-            input_just_activated = true;
+        if(ImGui::IsKeyPressed(ImGuiKey_P)) {
+            use_input_precision = true;
+            input_just_activated_precision = true;
         }
-        if (use_input) {
-            ImGui::SetNextItemWidth(300);
-            if (input_just_activated) {
-                ImGui::SetKeyboardFocusHere();
-                input_just_activated = false;
-            }
-            bool changed = ImGui::InputInt("Precision", &nb_its, 1, 100);
-            if (changed || !ImGui::IsItemActive()) {
-                use_input = false;
+        if(ImGui::IsKeyPressed(ImGuiKey_J)) {
+            waiting_for_julia_origin = true;
+        }
+
+        if(waiting_for_julia_origin) {
+            ImGui::Text("Click on the image to select the Julia set origin");
+            if (ImGui::IsMouseClicked(0)) {
+                double mouse_x, mouse_y;
+                glfwGetCursorPos(window, &mouse_x, &mouse_y);
+                waiting_for_julia_origin = false;
+                add_julia_plot(static_cast<int>(mouse_x), static_cast<int>(mouse_y));
             }
         } else {
-            if (ImGui::IsItemActive()) {
-                ImGui::SetNextItemWidth(300);
+            ImGui::Text("Press 'J' to select Julia set origin");
+        }
+
+        if(use_input_precision) {
+            ImGui::SetNextItemWidth(320);
+            if(input_just_activated_precision) {
+                ImGui::SetKeyboardFocusHere();
+                input_just_activated_precision = false;
+            }
+            bool changed = ImGui::InputInt("Precision", &nb_its, 1, 100);
+            if(changed || !ImGui::IsItemActive()) {
+                use_input_precision = false;
+            }
+        }
+        else {
+            if(ImGui::IsItemActive()) {
+                ImGui::SetNextItemWidth(320);
             }
             ImGui::SliderInt("Precision", &nb_its, 1, 25000);
         }
