@@ -12,9 +12,11 @@ Allows for interactive exploration of the Mandelbrot fractal
 
 - Use k or ESC to kill the application
 
-- Use b to load the previous picture
+- Use left (or a) or right (or e) to cycle through previous picture
 
 - Use p to define a new number of iterations, then type the new number and press Enter
+
+- Use s to save the current picture
 
 ## Julia fractals
 
@@ -22,7 +24,7 @@ Allows for interactive exploration of the Mandelbrot fractal
 
 ### To generate the Julia fractal corresponding to a specific point you are seeing on the screen, you must :
 
-- Press n on your keyboard
+- Press j on your keyboard
 
 - Click on the corresponding point with your mouse
 
@@ -30,15 +32,18 @@ You can then navigate normally through this specific Julia set
 
 ### To revert to Mandelbrot set
 
-Simply press n on your keyboard to revert to last Mandelbrot picture
+Simply go back through pictures with left or a
 
 # Installation
 
 ### Only tested on Linux
 
-Change the SAVE_FILE constant inside the bmp/params.h file to an existing path on your machine.
-You may change WIDTH and HEIGHT to fit your screen
+Use cmake .
+Run make command
 
-Compile with make
+### Params
 
-Run with ./exec
+By default, ./mandel will open a 1500 900 window
+you can use -w width_integer or -h height_inbteger to change those parameters
+
+example : ./mandel -w 1920 -h 1080
