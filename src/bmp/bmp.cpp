@@ -39,7 +39,10 @@ Pixel const& BMP_Picture::operator()(int i, int j) const {
 
 void BMP_Picture::save_BMP(const char* path){
   std::ofstream img_file(path, std::ios::out | std::ios:: binary);
-	long int const filesize = 4*(long int) width*(long int) height + 54;
+
+  long int const row_size = 3 * width;
+  long int const padded_row_size = (row_size + 3) & (~3);  // round up to multiple of 4
+  long int const filesize = 54 + padded_row_size * height;
 
 	uc bmp_header[] = {'B', 'M', static_cast<uc>(filesize), (uc) (filesize >> 8), (uc) (filesize >> 16), (uc) (filesize >> 24), 0,0,0,0,54,0,0,0,0};
 	img_file.write(reinterpret_cast<const char *> (&bmp_header[0]), 14);

@@ -207,14 +207,15 @@ void Window::init(std::string const title) {
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
-	glfwMakeContextCurrent(window);
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		exit(EXIT_FAILURE);
-	}
+    glfwMakeContextCurrent(window);
+    // Enable VSync to reduce CPU usage
+    glfwSwapInterval(1);
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) {
+        fprintf(stderr, "Failed to initialize GLEW\n");
+        exit(EXIT_FAILURE);
+    }
     glViewport(0, 0, width, height);
-    glfwSwapInterval(1); // Enable VSync to reduce CPU usage
 
     glfwSetWindowUserPointer(window, this);
 
