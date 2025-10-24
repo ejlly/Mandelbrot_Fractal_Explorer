@@ -37,11 +37,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         win->add_plot(0, 0, win->getwidth()-1, win->getheight()-1, true);
     }
     else if(key == GLFW_KEY_S && action == GLFW_RELEASE) {
-        //save current image
-        Plot& plot = win->get_last_plot();
-        std::string const filepath = "pics/" + plot.img_title;
-        plot.img.save_BMP(filepath);
-        printf("Saved picture as %s\n", filepath.c_str());
+        // open save dialog in UI
+        win->open_save_dialog();
     }
 }
 

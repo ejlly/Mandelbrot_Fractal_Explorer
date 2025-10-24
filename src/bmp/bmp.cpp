@@ -44,10 +44,43 @@ void BMP_Picture::save_BMP(const char* path){
   long int const padded_row_size = (row_size + 3) & (~3);  // round up to multiple of 4
   long int const filesize = 54 + padded_row_size * height;
 
-	uc bmp_header[] = {'B', 'M', static_cast<uc>(filesize), (uc) (filesize >> 8), (uc) (filesize >> 16), (uc) (filesize >> 24), 0,0,0,0,54,0,0,0,0};
+	uc bmp_header[14] = {
+    'B',
+    'M',
+    static_cast<uc>(filesize),
+    static_cast<uc>(filesize >> 8),
+    static_cast<uc>(filesize >> 16),
+    static_cast<uc>(filesize >> 24),
+    0,
+    0,
+    0,
+    0,
+    54,
+    0,
+    0,
+    0
+  };
+
 	img_file.write(reinterpret_cast<const char *> (&bmp_header[0]), 14);
 
-	uc dib_header[40] = {40, 0, 0, 0, (uc) width, (uc) (width >> 8), (uc) (width >> 16), (uc) (width >> 24), (uc) height, (uc) (height>>8), (uc) (height>>16), (uc) (height>>24), 1, 0, 24, 0 };
+	uc dib_header[40] = {
+    40,
+    0,
+    0,
+    0,
+    static_cast<uc>(width),
+    static_cast<uc>(width >> 8),
+    static_cast<uc>(width >> 16),
+    static_cast<uc>(width >> 24),
+    static_cast<uc>(height),
+    static_cast<uc>(height>>8),
+    static_cast<uc>(height>>16),
+    static_cast<uc>(height>>24),
+    1,
+    0,
+    24,
+    0
+  };
 
 	dib_header[24] = 19;
 	dib_header[25] = 11;

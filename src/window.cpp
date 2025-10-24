@@ -14,8 +14,13 @@ Plot::Plot() {
 	//Generate date
 	time_t const cur_time = std::time(NULL);
 	date = std::asctime(std::localtime(&cur_time)); 
-	date[19] = ',';
+	//date[19] = ',';
 	date.erase(0, 4);
+
+    if(date.find('\n') != std::string::npos)
+        date.erase(date.find('\n'), 1);
+
+    std::cout << date << std::endl;
 }
 
 Plot::Plot(int width, int height) : Plot() {
@@ -58,6 +63,81 @@ Plot::Plot(int width, int height, Complex const& _bottom_left, Complex const& _t
 Window::Window(int _width, int _height){
 	width = _width;
 	height = _height;
+}
+
+// Save dialog helpers
+bool Window::is_save_dialog_open() const {
+    return save_dialog_open;
+}
+
+void Window::open_save_dialog() {
+    save_dialog_open = true;
+    save_target_width = width;
+    save_target_height = height;
+}
+
+void Window::close_save_dialog() {
+    save_dialog_open = false;
+}
+
+void Window::set_save_target_size(int w, int h) {
+    save_target_width = w;
+    save_target_height = h;
+}
+
+std::pair<int,int> Window::get_save_target_size() const {
+    return {save_target_width, save_target_height};
+}
+
+// Save plot at a different resolution without changing current view
+void Window::save_plot_at_size(const Plot &plot, int target_w, int target_h, const std::string &filepath, int precision) {
+    // Create a copy of the plot with different image size
+    Plot tmp;
+
+
+    // Adjust bounds to target aspect ratio while keeping the same center
+    long double const cur_w = plot.top_right.x - plot.bottom_left.x;
+    long double const cur_h = plot.top_right.y - plot.bottom_left.y;
+    long double const target_aspect = static_cast<long double>(target_w) / static_cast<long double>(target_h);
+    long double const cur_aspect = cur_w / cur_h;
+
+    if (cur_aspect < target_aspect) {
+        // current is wider than target -> expand height
+        long double const new_h = cur_w / target_aspect;
+        long double const center_y = (plot.top_right.y + plot.bottom_left.y) / 2.0L;
+        tmp.bottom_left.y = center_y - new_h / 2.0L;
+        tmp.top_right.y = center_y + new_h / 2.0L;
+        tmp.bottom_left.x = plot.bottom_left.x;
+        tmp.top_right.x = plot.top_right.x;
+    } else {
+        // current is taller (or equal) than target -> expand width
+        long double const new_w = cur_h * target_aspect;
+        long double const center_x = (plot.top_right.x + plot.bottom_left.x) / 2.0L;
+        tmp.bottom_left.x = center_x - new_w / 2.0L;
+        tmp.top_right.x = center_x + new_w / 2.0L;
+        tmp.bottom_left.y = plot.bottom_left.y;
+        tmp.top_right.y = plot.top_right.y;
+    }
+    tmp.isJulia = plot.isJulia;
+    tmp.origin = plot.origin;
+    tmp.img = BMP_Picture(target_w, target_h);
+
+    // Temporarily create a fake Window for calculation with the target size
+    int old_width = width;
+    int old_height = height;
+    int old_nb_its = nb_its;
+    width = target_w;
+    height = target_h;
+    nb_its = precision;
+
+    calculate_frame(*this, tmp, true);
+
+    // Restore window size
+    width = old_width;
+    height = old_height;
+    nb_its = old_nb_its;
+
+    tmp.img.save_BMP(filepath);
 }
 
 Window::Window(){
@@ -416,6 +496,70 @@ bool Window::main_loop() {
             ImGui::SliderInt("Precision", &nb_its, 1, 25000);
         }
         ImGui::End();
+
+        // Save dialog modal
+        if (is_save_dialog_open()) {
+            ImGui::OpenPopup("Save Image");
+        }
+
+        if (ImGui::BeginPopupModal("Save Image", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            Plot &plot = memory[memory_index];
+            ImGui::Text("Save current plot");
+            ImGui::Separator();
+
+            static int tmp_w = 0;
+            static int tmp_h = 0;
+            static int tmp_precision = 0;
+            if (tmp_w == 0 || tmp_h == 0) {
+                auto sz = get_save_target_size();
+                tmp_w = sz.first;
+                tmp_h = sz.second;
+                tmp_precision = nb_its;
+            }
+
+            ImGui::Text("Choose an option:");
+            if (ImGui::Button("Save as is")) {
+                std::string const filepath = "pics/" + plot.img_title;
+                plot.img.save_BMP(filepath);
+                printf("Saved picture as %s\n", filepath.c_str());
+                tmp_w = tmp_h = 0;
+                close_save_dialog();
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Change resolution")) {
+                // show inputs
+                ImGui::InputInt("Width", &tmp_w);
+                ImGui::InputInt("Height", &tmp_h);
+            }
+
+            ImGui::Text("\nOr enter width/height and press Confirm:");
+            ImGui::InputInt("Target Width", &tmp_w);
+            ImGui::InputInt("Target Height", &tmp_h);
+            ImGui::Separator();
+            ImGui::Text("Precision (iterations)");
+            ImGui::SliderInt("##save_precision", &tmp_precision, 1, 25000);
+
+            if (ImGui::Button("Confirm")) {
+                if (tmp_w > 0 && tmp_h > 0) {
+                    std::string const filepath = "pics/" + plot.img_title;
+                    save_plot_at_size(plot, tmp_w, tmp_h, filepath, tmp_precision);
+                    printf("Saved picture as %s (res %dx%d, prec=%d)\n", filepath.c_str(), tmp_w, tmp_h, tmp_precision);
+                }
+                tmp_w = tmp_h = 0;
+                tmp_precision = 0;
+                close_save_dialog();
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel")) {
+                tmp_w = tmp_h = 0;
+                close_save_dialog();
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
 
         update_fractal(memory[memory_index].img);
         update_drag_box();

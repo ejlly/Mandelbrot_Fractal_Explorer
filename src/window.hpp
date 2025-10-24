@@ -88,6 +88,11 @@ class Window{
 
 		std::vector<Plot> memory;
 
+		// Save dialog state (used when user presses 'S')
+		bool save_dialog_open = false;
+		int save_target_width = 0;
+		int save_target_height = 0;
+
 	public:
 		Window(int _width, int _height);
 		Window();
@@ -110,6 +115,14 @@ class Window{
 
         bool add_plot(int sto_x, int sto_y, int mouse_x, int mouse_y, bool recalculate=false);
 		bool add_julia_plot(int mouse_x, int mouse_y);
+
+		// Save dialog API
+		bool is_save_dialog_open() const;
+		void open_save_dialog();
+		void close_save_dialog();
+		void set_save_target_size(int w, int h);
+		std::pair<int,int> get_save_target_size() const;
+	void save_plot_at_size(const Plot &plot, int target_w, int target_h, const std::string &filepath, int precision);
 
         DragState& get_drag_state();
 
